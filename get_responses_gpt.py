@@ -27,7 +27,7 @@ def main(args):
     df = pd.read_csv(args.input_file)
     if args.input_column not in df.columns:
         raise ValueError(f"Input column '{args.input_column}' not found in the file.")
-    
+
     # Set up OpenAI
     api_key = get_api_key()
     client = OpenAI(api_key=api_key)
@@ -43,20 +43,20 @@ def main(args):
         output_dir = os.path.dirname(args.output_file)
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir)
-    
+
      # Check if the output file exists and the column is already present
     if os.path.exists(args.output_file):
         output_df = pd.read_csv(args.output_file)
         if args.output_column in output_df.columns:
             raise ValueError(f"Output column '{args.output_column}' already exists in the output file. Choose a different name.")
-    
+
     # Process each row in the input column
     outputs = []
     for text in tqdm(df[args.input_column], desc="Processing rows"):
         prompt = format_prompt(text, args.AITA_binary)
         try:
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-2024-11-20",
                 messages=[{"role": "user", "content": prompt}],
                 max_completion_tokens=500,
             )

@@ -28,7 +28,7 @@ def run_local_hf(model_name, prompts):
         responses.append(response)
     return responses
 
-def run_openai(prompt_list, constrained=True, model="gpt-4o"):
+def run_openai(prompt_list, constrained=True, model="gpt-4o-2024-11-20"):
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     responses = []
     for prompt in tqdm(prompt_list, desc="GPT Inference"):
