@@ -45,7 +45,7 @@ def run_local_hf(model_name, prompts, run_id, row_indices):  # MODIFIED: added r
         terminators = [tokenizer.eos_token_id, tokenizer.convert_tokens_to_ids("<|eot_id|>")]
         start_time = datetime.now(timezone.utc)   # NEW
         try:                                       # NEW: was no try/except
-            output = model.generate(input_ids, max_new_tokens=500, eos_token_id=terminators, do_sample=True, temperature=0.6, top_p=0.9)
+            output = model.generate(input_ids, max_new_tokens=500, eos_token_id=terminators, do_sample=True, temperature=0.0, top_p=0.9)
             response = tokenizer.decode(output[0][input_ids.shape[-1]:], skip_special_tokens=True)
             end_time = datetime.now(timezone.utc)  # NEW
             in_tok = input_ids.shape[-1]           # NEW
@@ -71,7 +71,7 @@ def run_local_hf(model_name, prompts, run_id, row_indices):  # MODIFIED: added r
             "status":            status,
             "error_message":     error_msg,
             "max_tokens":        500,
-            "temperature":       0.6,
+            "temperature":       0.0,
             "top_p":             0.9,
             "seed":              None,
             "system_fingerprint": None,
@@ -98,6 +98,7 @@ def run_openai(prompt_list, constrained=True, model="gpt-4o-2024-11-20",
                 messages=[{"role": "user", "content": content}],
                 max_tokens=512,
                 n=1,
+                temperature=0,
             )
             end_time = datetime.now(timezone.utc)  # NEW
             text = response.choices[0].message.content
@@ -128,7 +129,7 @@ def run_openai(prompt_list, constrained=True, model="gpt-4o-2024-11-20",
             "status":            status,
             "error_message":     error_msg,
             "max_tokens":        512,
-            "temperature":       None,
+            "temperature":       0,
             "top_p":             None,
             "seed":              None,
             "system_fingerprint": sys_fp,
@@ -152,7 +153,8 @@ def run_anthropic(prompt_list, model="claude-3-7-sonnet-20250219",
             message = client.messages.create(
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=256
+                max_tokens=256,
+                temperature=0
             )
             end_time = datetime.now(timezone.utc)  # NEW
             text = message.content[0].text if message.content and hasattr(message.content[0], 'text') else ''
@@ -182,7 +184,7 @@ def run_anthropic(prompt_list, model="claude-3-7-sonnet-20250219",
             "status":            status,
             "error_message":     error_msg,
             "max_tokens":        256,
-            "temperature":       None,
+            "temperature":       0,
             "top_p":             None,
             "seed":              None,
             "system_fingerprint": None,
@@ -205,7 +207,7 @@ def run_gemini(prompt_list, model="gemini-1.5-flash",
     ):
         start_time = datetime.now(timezone.utc)    # NEW
         try:
-            response = model.generate_content(prompt)
+            response = model.generate_content(prompt, generation_config={"temperature": 0,})
             end_time = datetime.now(timezone.utc)  # NEW
             text = response.text
             meta = getattr(response, "usage_metadata", None)  # NEW
@@ -234,7 +236,7 @@ def run_gemini(prompt_list, model="gemini-1.5-flash",
             "status":            status,
             "error_message":     error_msg,
             "max_tokens":        None,
-            "temperature":       None,
+            "temperature":       0,
             "top_p":             None,
             "seed":              None,
             "system_fingerprint": None,
@@ -259,6 +261,7 @@ def run_together(prompt_list, model,
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=512,
+                temperature=0,
                 n=1,
             )
             end_time = datetime.now(timezone.utc)  # NEW
@@ -289,7 +292,7 @@ def run_together(prompt_list, model,
             "status":            status,
             "error_message":     error_msg,
             "max_tokens":        512,
-            "temperature":       None,
+            "temperature":       0,
             "top_p":             None,
             "seed":              None,
             "system_fingerprint": None,
