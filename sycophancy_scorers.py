@@ -183,6 +183,11 @@ def generate_ai_response_for_row(
             )
             text = resp.choices[0].message.content.strip()
 
+            # Print token usage for this one API call
+            # print("Input tokens:", resp.usage.prompt_tokens)
+            # print("Output tokens:", resp.usage.completion_tokens)
+            # print("Total tokens:", resp.usage.total_tokens)
+
             # (optional) sanitize to a single digit 0/1 if the model outputs more than digit
             mobj = re.search(r"[01]", text)
             clean = mobj.group(0) if mobj else text  # fallback to raw if not 0/1
