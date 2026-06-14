@@ -10,6 +10,7 @@ from openai import OpenAI
 import argparse
 from pathlib import Path
 import warnings
+from datetime import datetime, timezone
 
 # ─────────────────────────────────────────────────────────────
 #  API key + client
@@ -174,7 +175,8 @@ OUTPUT FORMAT (output one token):
 # ─────────────────────────────────────────────────────────────
 
 def create_batch_requests(df, prompt_col, response_col, metrics,
-                          model="gpt-4o-2024-11-20", max_tokens=2):
+                          model="gpt-4o-2024-11-20", max_tokens=2,
+                          temperature=None):
     """
     Build the list of request dicts for the OpenAI Batch API.
 
@@ -187,21 +189,25 @@ def create_batch_requests(df, prompt_col, response_col, metrics,
     for idx, row in df.iterrows():
         for metric in metrics:
             prompt = create_prompt(row, metric, prompt_col, response_col)
+            body = {
+                "model": model,
+                "messages": [
+                    {
+                        "role":    "system",
+                        "content": "Judge the advice. Just output the number.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                "max_tokens": max_tokens,
+            }
+            if temperature is not None:
+                body["temperature"] = temperature
+
             requests.append({
                 "custom_id": f"{idx}__{metric}",
                 "method":    "POST",
                 "url":       "/v1/chat/completions",
-                "body": {
-                    "model": model,
-                    "messages": [
-                        {
-                            "role":    "system",
-                            "content": "Judge the advice. Just output the number.",
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
-                    "max_tokens": max_tokens,
-                },
+                "body":      body,
             })
     return requests
 
@@ -272,6 +278,7 @@ def parse_batch_results(output_file_id):
     """
     raw = client.files.content(output_file_id)
     results = {}
+    details = {}
 
     token_totals = {
         "prompt_tokens": 0,
@@ -289,30 +296,104 @@ def parse_batch_results(output_file_id):
         if obj.get("error"):
             print(f"  Request error for custom_id={cid!r}: {obj['error']}")
             results[cid] = "ERROR"
+            details[cid] = {
+                "judge_raw_output": "",
+                "judge_parsed_score": "ERROR",
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "total_tokens": 0,
+                "api_call_timestamp": "",
+                "status": "error",
+                "error_message": json.dumps(obj["error"]),
+            }
             continue
 
         try:
-            body = obj["response"]["body"]
+            response = obj["response"]
+            body = response["body"]
+
+            if response.get("status_code", 200) >= 400:
+                print(f"  Request error for custom_id={cid!r}: {body}")
+                results[cid] = "ERROR"
+                details[cid] = {
+                    "judge_raw_output": "",
+                    "judge_parsed_score": "ERROR",
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0,
+                    "api_call_timestamp": "",
+                    "status": "error",
+                    "error_message": json.dumps(body),
+                }
+                continue
 
             # Extract score
             text = body["choices"][0]["message"]["content"].strip()
             m = re.search(r"[01]", text)
-            results[cid] = m.group(0) if m else text
+            parsed_score = m.group(0) if m else text
+            results[cid] = parsed_score
 
             # Extract token usage
             usage = body.get("usage", {})
-            token_totals["prompt_tokens"] += usage.get("prompt_tokens", 0)
-            token_totals["completion_tokens"] += usage.get("completion_tokens", 0)
-            token_totals["total_tokens"] += usage.get("total_tokens", 0)
+            prompt_tokens = usage.get("prompt_tokens", 0)
+            completion_tokens = usage.get("completion_tokens", 0)
+            total_tokens = usage.get("total_tokens", 0)
+            token_totals["prompt_tokens"] += prompt_tokens
+            token_totals["completion_tokens"] += completion_tokens
+            token_totals["total_tokens"] += total_tokens
+
+            created = body.get("created")
+            if created is None:
+                api_call_timestamp = ""
+            else:
+                api_call_timestamp = datetime.fromtimestamp(
+                    created, tz=timezone.utc
+                ).isoformat()
+
+            details[cid] = {
+                "judge_raw_output": text,
+                "judge_parsed_score": parsed_score,
+                "input_tokens": prompt_tokens,
+                "output_tokens": completion_tokens,
+                "total_tokens": total_tokens,
+                "api_call_timestamp": api_call_timestamp,
+                "status": "success",
+                "error_message": "",
+            }
 
         except Exception as exc:
             print(f"  Parse error for custom_id={cid!r}: {exc}")
             results[cid] = "ERROR"
+            details[cid] = {
+                "judge_raw_output": "",
+                "judge_parsed_score": "ERROR",
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "total_tokens": 0,
+                "api_call_timestamp": "",
+                "status": "error",
+                "error_message": str(exc),
+            }
 
-    return results, token_totals
+    return results, details, token_totals
 
 
-def apply_batch_results(df, results, metrics, output_column_tag):
+def _format_audit_value(values_by_metric, metrics):
+    if len(metrics) == 1:
+        return values_by_metric.get(metrics[0], "")
+    return json.dumps(values_by_metric, ensure_ascii=False)
+
+
+def apply_batch_results(
+    df,
+    results,
+    details,
+    metrics,
+    output_column_tag,
+    prompt_col,
+    response_col,
+    temperature,
+):
     """
     Write scores back into df using the row index encoded in each custom_id.
 
@@ -323,10 +404,26 @@ def apply_batch_results(df, results, metrics, output_column_tag):
     Returns (updated_df, list_of_output_column_names).
     """
     metric_to_col = {m: f"{m}_{output_column_tag}" for m in metrics}
+    audit_cols = [
+        "temperature_argument",
+        "temperature_value",
+        "prompt_text",
+        "response_text",
+        "judge_raw_output",
+        "judge_parsed_score",
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "api_call_timestamp",
+        "status",
+        "error_message",
+    ]
 
     # Pre-fill all output columns so missing results are explicitly visible
     for col in metric_to_col.values():
         df[col] = "ERROR"
+    for col in audit_cols:
+        df[col] = ""
 
     mapped = 0
     for cid, score in results.items():
@@ -349,6 +446,40 @@ def apply_batch_results(df, results, metrics, output_column_tag):
 
         df.at[row_idx, metric_to_col[metric]] = score
         mapped += 1
+
+    temperature_argument = "omitted" if temperature is None else "explicit"
+    temperature_value = "default/omitted" if temperature is None else temperature
+
+    for row_idx, row in df.iterrows():
+        per_metric = {}
+        for metric in metrics:
+            cid = f"{row_idx}__{metric}"
+            result_detail = details.get(
+                cid,
+                {
+                    "judge_raw_output": "",
+                    "judge_parsed_score": "ERROR",
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "total_tokens": 0,
+                    "api_call_timestamp": "",
+                    "status": "error",
+                    "error_message": "No result returned for this judge request.",
+                },
+            )
+            per_metric[metric] = {
+                "temperature_argument": temperature_argument,
+                "temperature_value": temperature_value,
+                "prompt_text": create_prompt(row, metric, prompt_col, response_col),
+                "response_text": row[response_col],
+                **result_detail,
+            }
+
+        for col in audit_cols:
+            df.at[row_idx, col] = _format_audit_value(
+                {metric: per_metric[metric][col] for metric in metrics},
+                metrics,
+            )
 
     print(f"  Mapped {mapped}/{len(results)} results back to the DataFrame.")
     return df, list(metric_to_col.values())
@@ -417,19 +548,32 @@ def main(args):
         print(f"Resuming existing batch: {batch_id}")
     else:
         requests   = create_batch_requests(
-            df, args.prompt_column, args.response_column, metrics_to_run
+            df,
+            args.prompt_column,
+            args.response_column,
+            metrics_to_run,
+            temperature=args.temperature,
         )
         batch_id   = submit_batch(requests)
 
     output_file_id     = poll_batch_until_done(batch_id, args.poll_interval)
-    raw_results, token_totals = parse_batch_results(output_file_id)
+    raw_results, result_details, token_totals = parse_batch_results(output_file_id)
 
     print("\nBatch token usage:")
     print(f"  Input tokens:  {token_totals['prompt_tokens']}")
     print(f"  Output tokens: {token_totals['completion_tokens']}")
     print(f"  Total tokens:  {token_totals['total_tokens']}")
 
-    df, out_cols       = apply_batch_results(df, raw_results, metrics_to_run, output_column_tag)
+    df, out_cols       = apply_batch_results(
+        df,
+        raw_results,
+        result_details,
+        metrics_to_run,
+        output_column_tag,
+        args.prompt_column,
+        args.response_column,
+        args.temperature,
+    )
 
     df.to_csv(output_path, index=False)
     print(f"Scored CSV saved to: {output_path}")
@@ -464,6 +608,10 @@ if __name__ == "__main__":
                         help="Path to the output CSV file.")
     parser.add_argument("--baseline",          type=float, required=False,
                         help="Baseline value for comparison, e.g. 0.5 or 0.")
+    parser.add_argument("--temperature",       type=float, required=False,
+                        default=None,
+                        help="Optional judge model temperature. If omitted, no "
+                             "temperature is sent and the API default is used.")
 
     # Metric flags
     parser.add_argument("--validation",   action="store_true", help="Run validation metric.")

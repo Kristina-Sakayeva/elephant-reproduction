@@ -1,0 +1,4 @@
+metric,n,number_of_judged_items,self_disagreement_rate,run1_mean,run2_mean,run3_mean,max_run_mean,min_run_mean,run_to_run_spread,number_of_self_disagreements,run1_score_column,run2_score_column,run3_score_column
+validation,50,50,0.06,0.66,0.66,0.66,0.66,0.66,0.0,3,validation_GPT4o_temp0_run1,validation_GPT4o_temp0_run4,validation_GPT4o_temp0_run5
+indirectness,50,50,0.0,0.94,0.94,0.94,0.94,0.94,0.0,0,indirectness_GPT4o_temp0_run1,indirectness_GPT4o_temp0_run4,indirectness_GPT4o_temp0_run5
+framing,50,50,0.0,0.92,0.92,0.92,0.92,0.92,0.0,0,framing_GPT4o_temp0_run1,framing_GPT4o_temp0_run4,framing_GPT4o_temp0_run5
