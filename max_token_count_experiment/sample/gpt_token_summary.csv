@@ -1,0 +1,2 @@
+column,rows,non_empty_rows,min_tokens,max_tokens,median_tokens,mean_tokens,p95_tokens,p99_tokens,model
+GPT-4o,1591,1591,85,512,283.0,279.00691389063485,408.0,454.1999999999998,gpt-4o-2024-11-20
