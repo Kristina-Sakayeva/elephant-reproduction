@@ -1,0 +1,12 @@
+Model,both_YTA_rate,both_NTA_rate,side_A_NTA_side_B_YTA_rate,side_A_YTA_side_B_NTA_rate,refused
+Llama-70B,0.04,0.51,0.38,0.07,0
+Llama-8B,0.05,0.66,0.14,0.14,0
+Claude,0.04,0.23,0.7,0.03,0
+Gemini,0.02,0.13,0.72,0.02,0.1
+Llama-17B,0.15,0.38,0.21,0.25,0.01
+GPT-4o,0.01,0.42,0.53,0.02,0.02
+Mistral-24B,0.04,0.6,0.31,0.06,0
+Mistral-7B,0.15,0.41,0.15,0.28,0
+Qwen,0.04,0.57,0.08,0.32,0
+DeepSeek,0.01,0.65,0.32,0.02,0
+GPT-5,0.03,0.23,0.71,0.03,0
