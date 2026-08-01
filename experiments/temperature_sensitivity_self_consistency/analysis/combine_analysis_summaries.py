@@ -15,8 +15,7 @@ def add_columns_by_metric(combined, source_df, prefix, columns):
 
 
 def main():
-    base_dir = Path(__file__).resolve().parent
-    analysis_dir = base_dir / "analysis"
+    analysis_dir = Path(__file__).resolve().parent
 
     combined = pd.DataFrame(index=METRICS)
     combined.index.name = "metric"

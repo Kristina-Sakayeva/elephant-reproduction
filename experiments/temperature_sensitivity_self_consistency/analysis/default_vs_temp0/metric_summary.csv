@@ -1,0 +1,4 @@
+metric,n,number_of_judged_items,disagreement_rate,default_mean,temp0_mean,mean_difference_default_minus_temp0,absolute_difference,number_of_disagreements,default_score_column,temp0_score_column
+validation,50,50,0.1,0.6,0.66,-0.06000000000000005,0.06000000000000005,5,validation_GPT4o_default_run1,validation_GPT4o_temp0_run1
+indirectness,50,50,0.0,0.94,0.94,0.0,0.0,0,indirectness_GPT4o_default_run1,indirectness_GPT4o_temp0_run1
+framing,50,50,0.02,0.94,0.92,0.019999999999999907,0.019999999999999907,1,framing_GPT4o_default_run1,framing_GPT4o_temp0_run1
