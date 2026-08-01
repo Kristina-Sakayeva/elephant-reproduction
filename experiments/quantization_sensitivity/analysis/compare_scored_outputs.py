@@ -32,7 +32,7 @@ def parse_args():
     )
     parser.add_argument(
         "--output-file",
-        default="elephant/Llama_quantization_experiment/analysis/llama_quantization_pairwise_comparisons.csv",
+        default="analysis/llama_quantization_pairwise_comparisons.csv",
         help="CSV path where comparison rows should be written.",
     )
     parser.add_argument(
