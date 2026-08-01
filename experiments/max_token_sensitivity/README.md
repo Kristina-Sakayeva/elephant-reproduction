@@ -114,7 +114,7 @@ python code/max_token_count_GPT_extraction.py \
 python code/max_token_count_GPT_extraction.py \
   --input_file sample/AITA-NTA-FLIP_sample.csv \
   --prompt_column flipped_story \
-  --output_file <path_to_512_responses_csv> \
+  --output_file <path_to_2000_responses_csv> \
   --model gpt-4o-2024-11-20 \
   --temperature 0 \
   --seed 123 \
@@ -129,10 +129,8 @@ python code/max_token_count_scorer.py \
   --response_column <response_column> \
   --output_column_tag <out_column_tag> \
   --output_file <path_to_512_responses_csv> \
-  --model gpt-4o-2024-11-20 \
   --temperature 0 \
-  --seed 123 \
-  --max_tokens 2000
+  --seed 123
 ```
 
 ## Analysis
@@ -152,9 +150,6 @@ For each dimension, the analysis calculates:
 - Mean score under the 512-token condition
 - Mean score under the 2,000-token condition
 - Mean difference between conditions
-- Number of judged response pairs
-- Number of disagreements
-- Disagreement rate
 - Number of changes from negative to positive
 - Number of changes from positive to negative
 - Exact paired-test p-value
@@ -173,8 +168,6 @@ Each token-limit condition is also compared with the corresponding scores releas
 
 For both the 512-token and 2,000-token conditions, the analysis calculates:
 
-- Agreement with the original score
-- Disagreement with the original score
 - Agreement rate for each dimension
 - Overall agreement across dimensions
 - Number and direction of label changes
@@ -206,20 +199,20 @@ python analysis/compare_token_limits_to_original_gpt4o.py
 ```
 ## Analysis Outputs
 
-The analysis produces summary files for each comparison, along with files containing the individual disagreement cases.
+The analysis produces summary files for each comparison.
 
 ### 512-Token vs. 2,000-Token Comparison
 
 - **Metric summary:** `analysis/AITA-NTA-FLIP_512_vs_2000_token_analysis.csv`
 
-The metric summary reports the mean scores, mean differences, direction of label changes, and paired statistical-test results for validation, indirectness, and framing.
+The metric summary reports the mean scores, mean differences, direction of label changes, and Exact McNemar/two-sided binomial sign test on discordant pairs results for validation, indirectness, and framing.
 
 
 ### Token limits vs. Original Comparison
 
 - **Metric summary:** `analysis/AITA-NTA-FLIP_512_2000_vs_original_gpt4o_analysis.csv`
 
-These files compare the scores produced under the 512-token condition with the corresponding scores released by the original study.
+These files compare the scores produced under the 512-token and 2000-token condition with the corresponding scores released by the original study.
 
 ### Combined Results
 
