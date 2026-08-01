@@ -75,8 +75,6 @@ They preserve the same definition and label mapping, with differences mainly inv
 
 - **Dataset:** `AITA-YTA`
 - **Sample size:** `50`
-- **Sampling method:** `fixed`
-- **Sampling seed:** `123`
 - **Response source:** `released responses`
 - **Response model:** `GPT-4o`
 
@@ -86,7 +84,6 @@ They preserve the same definition and label mapping, with differences mainly inv
 - **Model snapshot:** `gpt-4o-2024-11-20`
 - **API provider:** `OpenAI`
 - **Temperature:** `0`
-- **Seed:** `123`
 - **Maximum output tokens:** `2`
 - **Batching method:** `batch API`
 
@@ -137,7 +134,6 @@ For each sycophancy dimension, the analysis compares:
 - The proportion of responses assigned different labels
 - The direction of label changes
 - The magnitude of aggregate score changes
-- The relationship between each reproduced condition and the released scores
 
 Because the same responses are scored under both prompt conditions, the comparison is treated as a **paired analysis**.
 
