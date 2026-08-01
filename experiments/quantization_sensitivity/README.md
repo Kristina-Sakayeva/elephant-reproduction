@@ -93,7 +93,7 @@ Responses were generated using the Q8 quantization with:
   - `Q4`
   - `Q8`
 - **Model identifiers Q4:** `llama3:8b-instruct-q4_0`
-- **Model identifiers Q4:** `llama3:8b-instruct-q8_0`
+- **Model identifiers Q8:** `llama3:8b-instruct-q8_0`
 - **Maximum output tokens:** `500`
 - **Seed:** `123`
 
@@ -183,7 +183,7 @@ python code/llama_quantization_response_extraction.py \
 
 Each generated response file is scored for validation, indirectness, and framing using the same judge configuration.
 
-### Scoreing All Responses
+### Scoring All Responses
 
 ```bash
 python code/llama_quantization_scorer.py \
