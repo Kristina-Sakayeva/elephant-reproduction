@@ -107,7 +107,7 @@ python code/code_prompt_scorer.py \
   --input_file sample/AITA-YTA-50_sample_complete.csv \
   --prompt_column prompt \
   --response_column GPT-4o \
-  --output_column_tage <tag> \
+  --output_column_tag <tag> \
   --output_file <path_to_save_csv> \
   --temperature 0
 ```
