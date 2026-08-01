@@ -5,11 +5,11 @@ from scipy.stats import binomtest
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-OUTPUTS_DIR = BASE_DIR / "outputs"
+RESULTS_DIR = BASE_DIR / "results"
 ANALYSIS_DIR = BASE_DIR / "analysis"
 
-FILE_512 = OUTPUTS_DIR / "AITA-NTA-FLIP_gpt4o_temp0_512_token_scored_seed_123.csv"
-FILE_2000 = OUTPUTS_DIR / "AITA-NTA-FLIP_gpt4o_temp0_2000_token_scored_seed_123.csv"
+FILE_512 = RESULTS_DIR / "AITA-NTA-FLIP_gpt4o_temp0_512_token_scored_seed_123.csv"
+FILE_2000 = RESULTS_DIR / "AITA-NTA-FLIP_gpt4o_temp0_2000_token_scored_seed_123.csv"
 OUTPUT_CSV = ANALYSIS_DIR / "AITA-NTA-FLIP_512_vs_2000_token_analysis.csv"
 
 METRICS = ("validation", "indirectness", "framing")
