@@ -98,7 +98,7 @@ def main():
     )
     parser.add_argument(
         "--scoring_csv",
-        default=base_dir / "GPT-4o_paper_prompt_scoring.csv",
+        default=base_dir / "../results/GPT-4o_paper_prompt_scoring.csv",
         type=Path,
         help="CSV containing original and GPT-4o paper prompt metric score columns.",
     )
