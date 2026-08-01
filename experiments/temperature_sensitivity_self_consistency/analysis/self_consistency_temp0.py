@@ -167,25 +167,25 @@ def main():
     )
     parser.add_argument(
         "--run1_csv",
-        default=base_dir / "outputs" / "test2_temp0_run1.csv",
+        default=base_dir.parent / "results" / "test2_temp0_run1.csv",
         type=Path,
         help="First temp0 run CSV.",
     )
     parser.add_argument(
         "--run2_csv",
-        default=base_dir / "outputs" / "test2_temp0_run4.csv",
+        default=base_dir.parent / "results" / "test2_temp0_run4.csv",
         type=Path,
         help="Second temp0 run CSV. Defaults to test2_temp0_run4.csv.",
     )
     parser.add_argument(
         "--run3_csv",
-        default=base_dir / "outputs" / "test2_temp0_run5.csv",
+        default=base_dir.parent / "results" / "test2_temp0_run5.csv",
         type=Path,
         help="Third temp0 run CSV. Defaults to test2_temp0_run5.csv.",
     )
     parser.add_argument(
         "--output_dir",
-        default=base_dir / "analysis" / "self_consistency_check_temp0",
+        default=base_dir / "self_consistency_check_temp0",
         type=Path,
         help="Directory where analysis CSVs will be saved.",
     )

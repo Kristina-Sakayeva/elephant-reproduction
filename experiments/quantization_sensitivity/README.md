@@ -132,7 +132,8 @@ python code/llama_quantization_response_extraction.py \
   --test_data sample/AITA-YTA_sample_200_quantization_experiment.csv \
   --prompt_column prompt \
   --model_name llama3:8b-instruct-q4_0 \
-  --output_file <path_to_q4_temp0_responses.csv> \
+  --output_file results/llama3_q4_responses.csv \
+  --output_column llama3_8b_q4_temp0_response \
   --temperature 0 \
   --seed 123 \
   --max_tokens 500
@@ -145,7 +146,8 @@ python code/llama_quantization_response_extraction.py \
   --test_data sample/AITA-YTA_sample_200_quantization_experiment.csv \
   --prompt_column prompt \
   --model_name llama3:8b-instruct-q8_0 \
-  --output_file <path_to_q8_temp0_responses.csv> \
+  --output_file results/llama3_q8_responses.csv \
+  --output_column llama3_8b_q8_temp0_response \
   --temperature 0 \
   --seed 123 \
   --max_tokens 500
@@ -155,10 +157,11 @@ python code/llama_quantization_response_extraction.py \
 
 ```bash
 python code/llama_quantization_response_extraction.py \
-  --input_file sample/AITA-YTA_sample_200_quantization_experiment.csv \
+  --test_data sample/AITA-YTA_sample_200_quantization_experiment.csv \
   --prompt_column prompt \
-  --model llama3:8b-instruct-q4_0 \
-  --output_file <path_to_q4_paper_responses.csv> \
+  --model_name llama3:8b-instruct-q4_0 \
+  --output_file results/llama3_q4_paper_parameters_responses.csv \
+  --output_column llama3_8b_q4_paper_response \
   --temperature 0.6 \
   --top_p 0.9 \
   --seed 123 \
@@ -169,10 +172,11 @@ python code/llama_quantization_response_extraction.py \
 
 ```bash
 python code/llama_quantization_response_extraction.py \
-  --input_file sample/AITA-YTA_sample_200_quantization_experiment.csv \
+  --test_data sample/AITA-YTA_sample_200_quantization_experiment.csv \
   --prompt_column prompt \
-  --model llama3:8b-instruct-q8_0 \
-  --output_file <path_to_q8_paper_responses.csv> \
+  --model_name llama3:8b-instruct-q8_0 \
+  --output_file results/llama3_q8_paper_parameters_responses.csv \
+  --output_column llama3_8b_q8_paper_response \
   --temperature 0.6 \
   --top_p 0.9 \
   --seed 123 \
@@ -183,17 +187,59 @@ python code/llama_quantization_response_extraction.py \
 
 Each generated response file is scored for validation, indirectness, and framing using the same judge configuration.
 
-### Scoring All Responses
+### Score Q4 at Temperature 0
 
 ```bash
 python code/llama_quantization_scorer.py \
-  --input_file <path_to_responses.csv> \
+  --input_file results/llama3_q4_responses.csv \
   --prompt_column prompt \
-  --response_column <response_column> \
-  --output_file <path_to_scored.csv> \
+  --response_column llama3_8b_q4_temp0_response \
+  --output_column_tag llama3_8b_q4_scored \
+  --output_file results/llama3_q4_scored.csv \
   --temperature 0 \
   --seed 123
 ```
+
+### Score Q8 at Temperature 0
+
+```bash
+python code/llama_quantization_scorer.py \
+  --input_file results/llama3_q8_responses.csv \
+  --prompt_column prompt \
+  --response_column llama3_8b_q8_temp0_response \
+  --output_column_tag llama3_8b_q8_scored \
+  --output_file results/llama3_q8_scored.csv \
+  --temperature 0 \
+  --seed 123
+```
+
+### Score Q4 With Paper Parameters
+
+```bash
+python code/llama_quantization_scorer.py \
+  --input_file results/llama3_q4_paper_parameters_responses.csv \
+  --prompt_column prompt \
+  --response_column llama3_8b_q4_paper_response \
+  --output_column_tag llama3_8b_q4_scored \
+  --output_file results/llama3_q4_paper_parameters_scored.csv \
+  --temperature 0 \
+  --seed 123
+```
+
+### Score Q8 With Paper Parameters
+
+```bash
+python code/llama_quantization_scorer.py \
+  --input_file results/llama3_q8_paper_parameters_responses.csv \
+  --prompt_column prompt \
+  --response_column llama3_8b_q8_paper_response \
+  --output_column_tag llama3_8b_q8_scored \
+  --output_file results/llama3_q8_paper_parameters_scored.csv \
+  --temperature 0 \
+  --seed 123
+```
+
+The output tags end in `_scored` so the analysis script can detect the metric columns automatically.
 
 ## Analysis
 
@@ -204,7 +250,7 @@ The analysis includes four primary paired comparisons:
 3. **Q4 at temperature 0 vs. Q4 under the paper parameters**
 4. **Q8 at temperature 0 vs. Q8 under the paper parameters**
 
-Each of the four experimental conditions is also compared with the corresponding scores released by the original study.
+Each of the four experimental conditions is also compared with the original study's corresponding Llama-8B scores.
 
 For each sycophancy dimension, the analysis compares:
 
@@ -272,23 +318,26 @@ python analysis/compare_scored_outputs.py \
   --output-file analysis/llama_quantization_pairwise_comparisons.csv
 ```
 
-Comparison aganist original scores:
+### Comparison Against Original Llama-8B Scores
+
+This is a like-for-like comparison against the original study's Llama-8B scores.
+
 ```bash
 python analysis/compare_scored_outputs.py \
-  --pair q4_temp0_vs_original_gpt4o \
+  --pair q4_temp0_vs_original_llama8b \
     results/llama3_q4_scored.csv \
     sample/AITA-YTA_sample_200_with_full_results_quantization_experiment.csv \
-  --pair q8_temp0_vs_original_gpt4o \
+  --pair q8_temp0_vs_original_llama8b \
     results/llama3_q8_scored.csv \
     sample/AITA-YTA_sample_200_with_full_results_quantization_experiment.csv \
-  --pair q4_paper_vs_original_gpt4o \
+  --pair q4_paper_vs_original_llama8b \
     results/llama3_q4_paper_parameters_scored.csv \
     sample/AITA-YTA_sample_200_with_full_results_quantization_experiment.csv \
-  --pair q8_paper_vs_original_gpt4o \
+  --pair q8_paper_vs_original_llama8b \
     results/llama3_q8_paper_parameters_scored.csv \
     sample/AITA-YTA_sample_200_with_full_results_quantization_experiment.csv \
-  --file-b-score-template '{metric}_GPT-4o' \
-  --output-file analysis/quantization_vs_original_gpt4o_comparisons.csv
+  --file-b-score-template '{metric}_Llama-8B' \
+  --output-file analysis/llama_quantization_vs_full_results_llama8b_comparisons.csv
   ```
 
 
@@ -300,7 +349,7 @@ The analysis produces outputs for:
 - **Q4 vs. Q8 under the paper parameters**
 - **Q4 temperature 0 vs. Q4 paper parameters**
 - **Q8 temperature 0 vs. Q8 paper parameters**
-- **Each experimental condition vs. the original released scores**
+- **Each experimental condition vs. the original released Llama-8B scores**
 - **Practical-equivalence tests**
 
 ## Outputs
@@ -309,7 +358,7 @@ The analysis produces outputs for:
 - **Q4 temperature-0 responses:** `results/llama3_q4_scored.csv`
 - **Q8 temperature-0 responses:** `results/llama3_q8_scored.csv`
 - **Q4 paper-parameter responses:** `results/llama3_q4_paper_parameters_scored.csv`
-- **Q8 paper-parameter responses:** `esults/llama3_q8_paper_parameters_scored.csv`
+- **Q8 paper-parameter responses:** `results/llama3_q8_paper_parameters_scored.csv`
 - **Pairwise comparison results:** `analysis/llama_quantization_pairwise_comparisons.csv`
 - **Original-score comparisons:** `analysis/llama_quantization_vs_full_results_llama8b_comparisons.csv`
 - **Analysis notebook:** `../../full_analysis/additional_graphs_appendix.ipynb`

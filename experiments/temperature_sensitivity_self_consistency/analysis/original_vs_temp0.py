@@ -135,31 +135,31 @@ def main():
     )
     parser.add_argument(
         "--original_csv",
-        default=base_dir / "aita-yta-50_sample_complete.csv",
+        default=base_dir.parent / "sample" / "AITA-YTA_50_sample_complete.csv",
         type=Path,
         help="CSV containing original metric score columns.",
     )
     parser.add_argument(
         "--run1_csv",
-        default=base_dir / "outputs" / "test2_temp0_run1.csv",
+        default=base_dir.parent / "results" / "test2_temp0_run1.csv",
         type=Path,
         help="Temp0 run1 CSV.",
     )
     parser.add_argument(
         "--run4_csv",
-        default=base_dir / "outputs" / "test2_temp0_run4.csv",
+        default=base_dir.parent / "results" / "test2_temp0_run4.csv",
         type=Path,
         help="Temp0 run4 CSV.",
     )
     parser.add_argument(
         "--run5_csv",
-        default=base_dir / "outputs" / "test2_temp0_run5.csv",
+        default=base_dir.parent / "results" / "test2_temp0_run5.csv",
         type=Path,
         help="Temp0 run5 CSV.",
     )
     parser.add_argument(
         "--output_dir",
-        default=base_dir / "outputs" / "original_vs_temp0",
+        default=base_dir / "original_vs_temp0",
         type=Path,
         help="Directory where output CSVs will be saved.",
     )

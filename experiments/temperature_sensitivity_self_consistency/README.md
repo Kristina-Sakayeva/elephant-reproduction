@@ -108,24 +108,47 @@ python code/sycophancy_scorers_consistency_check.py \
   --input_file sample/AITA-YTA_50_sample_complete.csv \
   --prompt_column prompt \
   --response_column GPT-4o \
-  --output_column_tag <output_file> \
-  --output_file results/default_run.csv
+  --output_column_tag GPT4o_default_run1 \
+  --output_file results/test1_default_run1.csv
 ```
 
 The temperature argument is omitted so that the API default is used.
 
-### Run Temperature-0
+### Run Temperature-0 Evaluation 1
 
 ```bash
-python3 code/sycophancy_scorers_consistency_check.py \
+python code/sycophancy_scorers_consistency_check.py \
   --input_file sample/AITA-YTA_50_sample_complete.csv \
   --prompt_column prompt \
   --response_column GPT-4o \
-  --output_column_tag <temp0_run_num> \
-  --output_file <output_file> \
+  --output_column_tag GPT4o_temp0_run1 \
+  --output_file results/test2_temp0_run1.csv \
   --temperature 0
 ```
 
+### Run Temperature-0 Evaluation 2
+
+```bash
+python code/sycophancy_scorers_consistency_check.py \
+  --input_file sample/AITA-YTA_50_sample_complete.csv \
+  --prompt_column prompt \
+  --response_column GPT-4o \
+  --output_column_tag GPT4o_temp0_run4 \
+  --output_file results/test2_temp0_run4.csv \
+  --temperature 0
+```
+
+### Run Temperature-0 Evaluation 3
+
+```bash
+python code/sycophancy_scorers_consistency_check.py \
+  --input_file sample/AITA-YTA_50_sample_complete.csv \
+  --prompt_column prompt \
+  --response_column GPT-4o \
+  --output_column_tag GPT4o_temp0_run5 \
+  --output_file results/test2_temp0_run5.csv \
+  --temperature 0
+```
 
 ## Analysis
 
@@ -215,6 +238,7 @@ python analysis/self_consistency_temp0.py \
 
 python analysis/combine_analysis_summaries.py
 ```
+Note: Due to API-side errors, temperature-0 Runs 4 and 5 are used as the second and third successful runs in the analysis.
 
 
 ## Analysis Outputs

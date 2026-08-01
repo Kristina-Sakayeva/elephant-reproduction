@@ -84,7 +84,6 @@ This limit was selected to exceed the length of the longest GPT-4o response obse
 - **Judge snapshot:** `gpt-4o-2024-11-20`
 - **API provider:** `OpenAI`
 - **Temperature:** `0`
-- **Seed:** `123`
 - **Maximum output tokens:** `2`
 - **Dimensions evaluated:**
   - Validation
@@ -100,12 +99,12 @@ This limit was selected to exceed the length of the longest GPT-4o response obse
 python code/max_token_count_GPT_extraction.py \
   --input_file sample/AITA-NTA-FLIP_sample.csv \
   --prompt_column flipped_story \
-  --output_file <path_to_512_responses_csv> \
-  --model gpt-4o-2024-11-20 \
+  --output_file results/AITA-NTA-FLIP_gpt4o_temp0_512_token_responses_seed_123.csv \
+  --model_name gpt-4o-2024-11-20 \
   --temperature 0 \
   --seed 123 \
   --max_tokens 512 \
-  --output_column <output_column_name>
+  --output_column GPT4o_temp0_AITA-NTA-FLIP_response_512_token
 ```
 
 ### Second Run: 2000-Token Condition
@@ -114,23 +113,35 @@ python code/max_token_count_GPT_extraction.py \
 python code/max_token_count_GPT_extraction.py \
   --input_file sample/AITA-NTA-FLIP_sample.csv \
   --prompt_column flipped_story \
-  --output_file <path_to_2000_responses_csv> \
-  --model gpt-4o-2024-11-20 \
+  --output_file results/AITA-NTA-FLIP_gpt4o_temp0_2000_token_responses_seed_123.csv \
+  --model_name gpt-4o-2024-11-20 \
   --temperature 0 \
   --seed 123 \
   --max_tokens 2000 \
-  --output_column <output_column_name>
+  --output_column GPT4o_temp0_AITA-NTA-FLIP_response_2000_token
 ```
-### Scoring Both Runs
+### Score the 512-Token Run
+
 ```bash
 python code/max_token_count_scorer.py \
-  --input_file <path_to_512_or_2000_run> \
+  --input_file results/AITA-NTA-FLIP_gpt4o_temp0_512_token_responses_seed_123.csv \
   --prompt_column flipped_story \
-  --response_column <response_column> \
-  --output_column_tag <out_column_tag> \
-  --output_file <path_to_512_responses_csv> \
-  --temperature 0 \
-  --seed 123
+  --response_column GPT4o_temp0_AITA-NTA-FLIP_response_512_token \
+  --output_column_tag GPT4o_AITA-NTA-FLIP_temp0_512_token_seed_123 \
+  --output_file results/AITA-NTA-FLIP_gpt4o_temp0_512_token_scored_seed_123.csv \
+  --temperature 0
+```
+
+### Score the 2,000-Token Run
+
+```bash
+python code/max_token_count_scorer.py \
+  --input_file results/AITA-NTA-FLIP_gpt4o_temp0_2000_token_responses_seed_123.csv \
+  --prompt_column flipped_story \
+  --response_column GPT4o_temp0_AITA-NTA-FLIP_response_2000_token \
+  --output_column_tag GPT4o_AITA-NTA-FLIP_temp0_2000_token_seed_123 \
+  --output_file results/AITA-NTA-FLIP_gpt4o_temp0_2000_token_scored_seed_123.csv \
+  --temperature 0
 ```
 
 ## Analysis

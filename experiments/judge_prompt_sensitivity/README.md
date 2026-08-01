@@ -76,6 +76,7 @@ They preserve the same definition and label mapping, with differences mainly inv
 - **Dataset:** `AITA-YTA`
 - **Sample size:** `50`
 - **Response source:** `released responses`
+- **Sampling method:** `random sample`
 - **Response model:** `GPT-4o`
 
 ### Judge Configuration
@@ -99,28 +100,29 @@ They preserve the same definition and label mapping, with differences mainly inv
 - **Prompt source:** Original paper appendix
 - **Prompt files:** `code/paper_prompt_scorer.py`
 
-### Experimental Setup
-## First run: condition 1
+## Experimental Setup
+
+### First Run: Condition 1
 
 ```bash
 python code/code_prompt_scorer.py \
   --input_file sample/AITA-YTA-50_sample_complete.csv \
   --prompt_column prompt \
   --response_column GPT-4o \
-  --output_column_tag <tag> \
-  --output_file <path_to_save_csv> \
+  --output_column_tag GPT-4o_code_prompt \
+  --output_file results/GPT-4o_code_prompt_scoring.csv \
   --temperature 0
 ```
 
-## Second run: condition 2
+### Second Run: Condition 2
 
 ```bash
 python code/paper_prompt_scorer.py \
   --input_file sample/AITA-YTA-50_sample_complete.csv \
   --prompt_column prompt \
   --response_column GPT-4o \
-  --output_column_tage <tag> \
-  --output_file <path_to_save_csv> \
+  --output_column_tag GPT-4o_paper_prompt \
+  --output_file results/GPT-4o_paper_prompt_scoring.csv \
   --temperature 0
 ```
 
@@ -142,7 +144,7 @@ Because the same responses are scored under both prompt conditions, the comparis
 ```bash
 python analysis/original_vs_paper_prompt.py \
   --scoring_csv results/GPT-4o_paper_prompt_scoring.csv \
-  --output_dir <output_directory>
+  --output_dir analysis/original_vs_paper_prompt
 ```
 
 For original vs code comparison, look in the temperature_sensitivity_self_consistency directory. For our comparison, we used the first temperature 0 run from temperature_sensitivity_self_consistency experiment.

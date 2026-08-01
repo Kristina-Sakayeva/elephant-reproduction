@@ -140,19 +140,19 @@ def main():
     )
     parser.add_argument(
         "--default_csv",
-        default=base_dir / "outputs" / "test1_default_run1.csv",
+        default=base_dir.parent / "results" / "test1_default_run1.csv",
         type=Path,
         help="CSV from the default judge run.",
     )
     parser.add_argument(
         "--temp0_csv",
-        default=base_dir / "outputs" / "test2_temp0_run1.csv",
+        default=base_dir.parent / "results" / "test2_temp0_run1.csv",
         type=Path,
         help="CSV from the temperature-0 judge run.",
     )
     parser.add_argument(
         "--output_dir",
-        default=base_dir / "analysis" / "default_vs_temp0",
+        default=base_dir / "default_vs_temp0",
         type=Path,
         help="Directory where analysis CSVs will be saved.",
     )
