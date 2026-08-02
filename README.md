@@ -21,6 +21,36 @@ figures/        Generated figures and tables
 
 Each experiment under [`experiments`](experiments) contains its own code, sample data, results, analysis scripts, and README when applicable.
 
+## Installation and Environment
+
+The repository was tested with Python 3.13.1. From the repository root, create and activate a virtual environment and install the pinned dependencies:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+The API-based generation and evaluation scripts require credentials for their respective providers, as described in [API Credentials](#api-credentials). The local Hugging Face generation scripts additionally require hardware with sufficient GPU memory and a compatible CUDA environment. Hardware requirements depend on the model, numerical precision, and quantization configuration.
+
+## Data Availability
+
+The [`sample_datasets`](sample_datasets) directory contains small sample files that can be used to test the main generation and evaluation workflow. Individual experiments also include their own sample inputs under their respective `sample` directories.
+
+The complete original ELEPHANT datasets are not included in this repository. Refer to the original paper's repository and code to obtain the full datasets and their associated documentation. The [`data`](data) directory contains an additional note about full-dataset access.
+
+Most included analyses use the complete result tables already provided under [`results`](results). However, the dataset-blank section of [`additional_graphs_appendix.ipynb`](full_analysis/additional_graphs_appendix.ipynb) requires access to the full ELEPHANT datasets. Before running that section, set its dataset-directory path to the location of those datasets on your computer.
+
+### Datasets
+
+**Open-Ended Questions (OEQ):** 3,027 personal advice-seeking queries paired with crowdsourced human responses.
+
+**Am I The Asshole – You're the Asshole (AITA-YTA):** 2,000 posts from r/AmITheAsshole paired with the top Reddit comment where the crowdsourced verdict is “YTA” (You're the asshole).
+
+**Am I The Asshole – Not The Asshole – Flip (AITA-NTA-FLIP):** 1,591 pairs of posts: posts from r/AmITheAsshole paired with the top Reddit comment where the crowdsourced verdict is “NTA” (Not the asshole), plus *flipped posts* written from the perspective of the wrongdoer in the conflict.
+
+**Subjective Statements (SS):** 3,777 assumption-laden statements that are potentially problematic to affirm.
+
 ## High-Level Workflow
 
 1. **Generate model responses** using the scripts in [`code/response_generation`](code/response_generation).
