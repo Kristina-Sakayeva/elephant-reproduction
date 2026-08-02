@@ -11,7 +11,7 @@ Because several original models were unavailable at the time of reproduction, th
 ## Repository Structure
 
 ```text
-code/           Response-generation and response-evaluation scripts
+code/           Response-generation, response-evaluation scripts, and results analysis
 data/           Data used for generation and evaluation
 experiments/    Sensitivity, consistency, and robustness experiments
 results/        Full model responses, scores, metadata, and result tables
@@ -26,7 +26,22 @@ Each experiment under [`experiments`](experiments) contains its own code, sample
 1. **Generate model responses** using the scripts in [`code/response_generation`](code/response_generation).
 2. **Score the responses with a judge** using the scripts in [`code/response_evaluation`](code/response_evaluation).
 3. **Assemble the full result tables** by combining the model responses, judge scores, and associated metadata into the tables stored in [`results`](results).
-4. **Run the results analysis notebooks** in [`full_analysis`](full_analysis) to reproduce the analyses, figures, and tables.
+4. **Run the results analysis notebooks** in [`code/results_analysis`](code/results_analysis) to reproduce the analyses, figures, and tables.
+
+## Tracked Metadata
+
+The generation and evaluation scripts preserve metadata alongside each response and score to support auditing and reproducibility. Available fields vary slightly by provider and inference backend, but generally include:
+
+- **Data provenance:** input dataset path, prompt and response columns, row or request identifier, prompt text, and prompt hash.
+- **Model identity:** requested model, returned model snapshot or revision, provider, quantization, model family, and inference backend when available.
+- **Generation configuration:** temperature, top-p, seed, maximum tokens, reasoning configuration, number of requested completions, and whether the AITA binary instruction was used.
+- **Execution provenance:** request, batch, and run IDs; request and API-call timestamps; Git commit; package versions; and provider-specific system fingerprints.
+- **Token usage:** input or prompt tokens, output or completion tokens, total tokens, and reasoning-token usage when available.
+- **Completion state:** finish reason, status, error message, retry or rerun count, and provider-specific generation metadata.
+- **Local inference environment:** GPU name and count, numerical precision, model revision, and relevant Transformers, PyTorch, and Hugging Face Hub versions when applicable.
+- **Judge audit fields:** judge model and provider, judge prompt, evaluated response, raw judge output, parsed binary score, judge sampling settings, token usage, timestamps, status, and errors.
+
+Provider-specific scripts may record additional metadata, such as OpenRouter generation IDs, response IDs, artifact paths, provider-routing information, or estimated judge cost.
 
 ## Model and Evaluator Configurations
 
@@ -69,6 +84,48 @@ export TOGETHER_API_KEY=<together_api_key>
 | Together AI | `TOGETHER_API_KEY` | `together_key.txt` |
 
 Environment variables are recommended. Never commit API keys or local key files to version control. Ollama and the local Hugging Face generation scripts do not use these provider API keys.
+
+## Quick Start
+
+The following example generates GPT-4o responses for a sample dataset and then scores those responses with the GPT-4o judge. Run the commands from the repository root.
+
+First, set your OpenAI API key:
+
+```bash
+export OPENAI_API_KEY=<openai_api_key>
+```
+
+Generate responses using the GPT-4o configuration listed above. Temperature and top-p are omitted so the OpenAI API defaults are used.
+
+```bash
+python code/response_generation/openAI_response_extraction.py \
+  --model_name gpt-4o-2024-11-20 \
+  --input_file sample_datasets/AITA-YTA_sample.csv \
+  --prompt_column prompt \
+  --output_file quickstart/gpt4o_responses.csv \
+  --output_column GPT-4o \
+  --max_tokens 512 \
+  --seed 123
+```
+
+Score the generated responses with the GPT-4o judge using temperature 0 and seed 123:
+
+```bash
+python code/response_evaluation/judge_scorer_extraction_GPT4o.py \
+  --input_file quickstart/gpt4o_responses.csv \
+  --prompt_column prompt \
+  --response_column GPT-4o \
+  --output_column_tag GPT4o_quickstart_scored \
+  --output_file quickstart/gpt4o_responses_scored.csv \
+  --temperature 0 \
+  --seed 123
+```
+
+Both commands use the OpenAI Batch API. They print a batch ID that can be supplied with `--batch_id <batch_id>` to resume polling if a run is interrupted.
+
+## API Costs
+
+Model-response extraction costs vary by provider, model, dataset size, output length, and current API pricing. GPT-4o judge scoring for the complete set of responses from all 11 models cost approximately **$550**.
 
 ## Code Usage
 
@@ -248,3 +305,9 @@ The [`results`](results) directory contains the complete result tables used by t
 - [`judge_robustness_full_results`](results/judge_robustness_full_results) contains results rescored with the alternate Llama-70B judge. Its [`human_baseline`](results/judge_robustness_full_results/human_baseline) subfolder contains the corresponding alternate-judge human-baseline scores.
 
 Files are organized by dataset, including AITA-YTA, AITA-NTA-OG, AITA-NTA-FLIP, OEQ, and SS. The analysis notebooks read these tables to compare the original study, the main reproduction, and the judge-robustness evaluation.
+
+**Dataset naming note:** SS and ALP refer to the same dataset. The original paper used both names; consistent with that convention, we refer to the dataset as **ALP** in our paper and as **SS** throughout this repository.
+
+## Citation of the Reproduced Work
+
+Myra Cheng, Sunny Yu, Cinoo Lee, Pranav Khadpe, Lujain Ibrahim, and Dan Jurafsky. “ELEPHANT: Measuring and Understanding Social Sycophancy in LLMs.” In *Proceedings of the International Conference on Learning Representations (ICLR)*, 2026b. [arXiv:2505.13995](https://arxiv.org/abs/2505.13995).
