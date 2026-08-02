@@ -227,7 +227,7 @@ These files compare the scores produced under the 512-token and 2000-token condi
 
 ### Combined Results
 
-- **Combined results table:** `../../figures/full_max_token_analysis_table.pdf`
+- **Combined results table:** `../../figures/appendix_figures/full_max_token_analysis_table.pdf`
 - **Analysis notebook:** `../../full_analysis/additional_graphs_appendix.ipynb`
 
 The combined results summarize the direct token-limit comparison and both comparisons against the original released scores.
