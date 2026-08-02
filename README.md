@@ -8,6 +8,26 @@ We regenerate model responses across four behavioral datasets, rescore them from
 
 Because several original models were unavailable at the time of reproduction, the experiments use a combination of direct model access, successor models, and approximate replacements accessed through multiple providers. The model identifiers, providers, scripts, and generation parameters used in each experiment are documented below.
 
+## Repository Structure
+
+```text
+code/           Response-generation and response-evaluation scripts
+data/           Data used for generation and evaluation
+experiments/    Sensitivity, consistency, and robustness experiments
+results/        Full model responses, scores, metadata, and result tables
+full_analysis/  Main, appendix, and judge-robustness analysis notebooks
+figures/        Generated figures and tables
+```
+
+Each experiment under [`experiments`](experiments) contains its own code, sample data, results, analysis scripts, and README when applicable.
+
+## High-Level Workflow
+
+1. **Generate model responses** using the scripts in [`code/response_generation`](code/response_generation).
+2. **Score the responses with a judge** using the scripts in [`code/response_evaluation`](code/response_evaluation).
+3. **Assemble the full result tables** by combining the model responses, judge scores, and associated metadata into the tables stored in [`results`](results).
+4. **Run the results analysis notebooks** in [`full_analysis`](full_analysis) to reproduce the analyses, figures, and tables.
+
 ## Model and Evaluator Configurations
 
 | Model | Platform | Type | Model ID | Script | Temperature | Top-p | Seed | Max tokens | Notes |
@@ -25,6 +45,30 @@ Because several original models were unavailable at the time of reproduction, th
 | Qwen2.5-7B-Instruct-Turbo | Together AI | Direct | `Qwen/Qwen2.5-7B-Instruct-Turbo` | `code/response_generation/together_API_response_extraction.py` | 0.6 | 0.9 | 123 | 512 | Accessed directly through Together AI. |
 | GPT-4o judge | OpenAI | Evaluator | `gpt-4o-2024-11-20` | `code/response_evaluation/judge_scorer_extraction_GPT4o.py` | 0 | — | 123 | 2 | Binary judge output. |
 | Llama-70B judge | OpenRouter | Evaluator | `meta-llama/llama-3.3-70b-instruct` | `code/response_evaluation/judge_scorer_extraction_llama70b.py` | 0 | — | 123 | 2 | Underlying provider: DeepInfra. Binary judge output. |
+
+## API Credentials
+
+Set the environment variables required by the providers you intend to use:
+
+```bash
+export OPENAI_API_KEY=<openai_api_key>
+export ANTHROPIC_API_KEY=<anthropic_api_key>
+export GEMINI_API_KEY=<gemini_api_key>
+export OPENROUTER_API_KEY=<openrouter_api_key>
+export TOGETHER_API_KEY=<together_api_key>
+```
+
+`GOOGLE_API_KEY` may be used instead of `GEMINI_API_KEY` for Gemini. The scripts also support the following local key-file fallbacks when the corresponding environment variable is not set:
+
+| Provider | Environment variable | Local key-file fallback |
+|---|---|---|
+| OpenAI | `OPENAI_API_KEY` | `key.txt` |
+| Anthropic | `ANTHROPIC_API_KEY` | `anthropic_key.txt` or `claude_key.txt` |
+| Gemini | `GEMINI_API_KEY` or `GOOGLE_API_KEY` | `gemini_key.txt` or `google_key.txt` |
+| OpenRouter | `OPENROUTER_API_KEY` | `openrouter_key.txt` or `openrouter.txt` |
+| Together AI | `TOGETHER_API_KEY` | `together_key.txt` |
+
+Environment variables are recommended. Never commit API keys or local key files to version control. Ollama and the local Hugging Face generation scripts do not use these provider API keys.
 
 ## Code Usage
 
@@ -181,3 +225,26 @@ python code/response_evaluation/judge_scorer_extraction_llama70b.py \
 ```
 
 Both evaluation scripts score validation, indirectness, and framing when no individual metric flag is supplied. Use `--validation`, `--indirectness`, or `--framing` to run only selected metrics. Optional sampling arguments may be omitted to use the provider's default behavior.
+
+## Full Analysis
+
+The complete analysis is available in the [`full_analysis`](full_analysis) directory.
+
+- [`paper_reproduction_analysis.ipynb`](full_analysis/paper_reproduction_analysis.ipynb) contains the main reproduction analysis.
+- [`additional_graphs_appendix.ipynb`](full_analysis/additional_graphs_appendix.ipynb) contains the supplementary and appendix analyses and generates the additional figures and tables.
+- [`Judge Robustness`](full_analysis/Judge%20Robustness) contains the analyses comparing GPT-4o and Llama-70B judge results:
+  - [`reproduction_robustness_analysis.ipynb`](full_analysis/Judge%20Robustness/reproduction_robustness_analysis.ipynb) analyzes how reproduction results change across judges.
+  - [`judge_robustness_agreement.ipynb`](full_analysis/Judge%20Robustness/judge_robustness_agreement.ipynb) evaluates judge agreement, precision, and recall.
+- [`Appendix Info`](full_analysis/Appendix%20Info) contains supporting summary CSVs used by the appendix analysis.
+
+Generated figures are organized by analysis type in the [`figures`](figures) directory.
+
+## Results
+
+The [`results`](results) directory contains the complete result tables used by the analysis notebooks and figures. The result CSVs include the full model responses alongside their scores and associated metadata. Results are grouped by their role in the study:
+
+- [`paper_full_results`](results/paper_full_results) contains the metric tables released by the original ELEPHANT study. These files serve as the reference results for the reproduction comparisons.
+- [`main_reproduction_full_results`](results/main_reproduction_full_results) contains the complete results from the main reproduction, including dataset-level scores, the AITA-NTA moral-sycophancy calculations, and GPT-4o-rescored human baselines in its [`human_baseline`](results/main_reproduction_full_results/human_baseline) subfolder.
+- [`judge_robustness_full_results`](results/judge_robustness_full_results) contains results rescored with the alternate Llama-70B judge. Its [`human_baseline`](results/judge_robustness_full_results/human_baseline) subfolder contains the corresponding alternate-judge human-baseline scores.
+
+Files are organized by dataset, including AITA-YTA, AITA-NTA-OG, AITA-NTA-FLIP, OEQ, and SS. The analysis notebooks read these tables to compare the original study, the main reproduction, and the judge-robustness evaluation.
